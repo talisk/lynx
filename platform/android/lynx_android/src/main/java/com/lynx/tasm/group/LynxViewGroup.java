@@ -144,7 +144,7 @@ class LynxViewGroup implements ILynxViewGroup, ILynxViewRuntimeCacheManager {
       this.fetchTemplate();
     } else if (this.logicExecutor == null) {
       this.logicExecutor = new DefaultLogicExecutor(
-          templateBundle, lynxRuntimeOptions, mContext, LynxViewGroup.this);
+          templateBundle, lynxRuntimeOptions, mContext, LynxViewGroup.this, debuggable);
     }
   }
 
@@ -420,7 +420,7 @@ class LynxViewGroup implements ILynxViewGroup, ILynxViewRuntimeCacheManager {
                   if (templateBundle != null) {
                     if (logicExecutor == null) {
                       logicExecutor = new DefaultLogicExecutor(
-                          templateBundle, lynxRuntimeOptions, mContext, LynxViewGroup.this);
+                          templateBundle, lynxRuntimeOptions, mContext, LynxViewGroup.this, debuggable);
                     }
                   }
 

@@ -251,7 +251,7 @@ jlong Create(JNIEnv* env, jclass jcaller, jlong runtime_wrapper_ptr,
              jboolean use_invoke_ui_method, jboolean long_task_monitor_disabled,
              jboolean force_layout_on_background_thread,
              jboolean enable_unified_pipeline, jint embedded_mode,
-             jlong engine_wrapper_ptr, jobject module_factory) {
+             jboolean debuggable, jlong engine_wrapper_ptr, jobject module_factory) {
   auto* ui_delegate =
       reinterpret_cast<lynx::tasm::UIDelegate*>(ui_delegate_ptr);
 
@@ -351,6 +351,7 @@ jlong Create(JNIEnv* env, jclass jcaller, jlong runtime_wrapper_ptr,
               std::make_unique<lynx::shell::TasmPlatformInvokerAndroid>(
                   env, tasm_platform_invoker))
           .SetForceLayoutOnBackgroundThread(force_layout_on_background_thread)
+          .SetDebuggable(debuggable)
           .build());
 }
 
@@ -399,7 +400,7 @@ void InitRuntime(JNIEnv* env, jclass jcaller, jlong ptr,
                  jobject resource_loader, jobject java_module_factory,
                  jstring java_group_id, jobjectArray preload_js_paths,
                  jstring bytecode_source_url, jint runtime_flag,
-                 jlong ui_delegate_ptr) {
+                 jlong ui_delegate_ptr, jboolean debuggable) {
   auto* shell = reinterpret_cast<LynxShell*>(ptr);
   // Create native module manager
   std::shared_ptr<lynx::pub::LynxNativeModuleManager> native_module_manager =
@@ -444,7 +445,7 @@ void InitRuntime(JNIEnv* env, jclass jcaller, jlong ptr,
   };
   shell->InitRuntime(group_id, loader, native_module_manager,
                      std::move(on_runtime_actor_created), std::move(paths),
-                     runtime_flag, source_url);
+                     runtime_flag, source_url, debuggable);
 }
 
 void StartRuntime(JNIEnv* env, jclass jcaller, jlong ptr, jlong lifecycle) {

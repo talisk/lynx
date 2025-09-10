@@ -39,7 +39,7 @@ class ElementHelperTest : public ::testing::Test {
         ::testing::NiceMock<lynx::tasm::test::MockTasmDelegate>>();
     manager = std::make_unique<lynx::tasm::ElementManager>(
         std::make_unique<lynx::tasm::MockPaintingContext>(),
-        tasm_mediator.get(), lynx_env_config);
+        tasm_mediator.get(), lynx_env_config, true);
     auto config = std::make_shared<lynx::tasm::PageConfig>();
     config->SetEnableZIndex(true);
     manager->SetConfig(config);

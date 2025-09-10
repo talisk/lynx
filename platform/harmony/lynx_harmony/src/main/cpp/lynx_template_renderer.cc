@@ -76,7 +76,7 @@ LynxTemplateRenderer::LynxTemplateRenderer(
     int32_t thread_mode, std::string group_id, bool use_quickjs,
     bool enable_js_group_thread, std::vector<std::string> preload_js_paths,
     bool enable_bytecode, std::string bytecode_source_url, bool enable_js,
-    std::unique_ptr<ModuleFactoryHarmony> module_factory)
+    std::unique_ptr<ModuleFactoryHarmony> module_factory, bool debuggable)
     : env_(env),
       display_density_(display_density),
       ui_delegate_(ui_delegate),
@@ -167,7 +167,7 @@ LynxTemplateRenderer::LynxTemplateRenderer(
   shell_->InitRuntime(group_id, resource_loader, module_manager_,
                       std::move(on_runtime_actor_created),
                       std::move(preload_js_paths), runtime_flags,
-                      bytecode_source_url);
+                      bytecode_source_url, debuggable);
   perf_controller_proxy_ = std::make_shared<shell::PerfControllerProxyImpl>(
       shell_->GetPerfControllerActor());
   ui_delegate_->OnLynxCreate(engine_proxy_, runtime_proxy_,

@@ -46,7 +46,7 @@ class InspectorTasmExecutorTest : public ::testing::Test {
         ::testing::NiceMock<lynx::tasm::test::MockTasmDelegate>>();
     manager_ = std::make_unique<lynx::tasm::ElementManager>(
         std::make_unique<lynx::tasm::MockPaintingContext>(),
-        tasm_mediator_.get(), lynx_env_config);
+        tasm_mediator_.get(), lynx_env_config, true);
     devtool::MockReceiver::GetInstance().ResetAll();
     devtool_mediator_ = std::make_shared<lynx::devtool::LynxDevToolMediator>();
     devtools_ng_ = std::make_shared<lynx::testing::LynxDevToolNGMock>();

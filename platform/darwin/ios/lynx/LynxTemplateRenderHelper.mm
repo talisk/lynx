@@ -80,7 +80,7 @@
   }
 }
 
-- (void)setUpLynxShellWithLastInstanceId:(int32_t)lastInstanceId {
+- (void)setUpLynxShellWithLastInstanceId:(int32_t)lastInstanceId debuggable:(BOOL)debuggable {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_RENDER_SETUP_SHELL);
 
   // Env
@@ -151,13 +151,14 @@
           .SetTasmPlatformInvoker(std::make_unique<lynx::shell::TasmPlatformInvokerDarwin>(self))
           .SetUseInvokeUIMethodFunction(_lynxUIRenderer.useInvokeUIMethodFunction)
           .SetLynxEngineWrapper(_lynxEngine ? [_lynxEngine getEngineNative] : nullptr)
+          .SetDebuggable(_debuggable)
           .build());
 
   [_devTool onTemplateAssemblerCreated:(intptr_t)shell_.get()];
 
   // Runtime
   if (_embeddedMode == LynxEmbeddedModeUnset) {
-    [self setUpRuntimeWithLastInstanceId:lastInstanceId];
+    [self setUpRuntimeWithLastInstanceId:lastInstanceId debuggable:debuggable];
   }
 
   // reset ui flush flag
@@ -183,7 +184,7 @@
                                }];
 }
 
-- (void)setUpRuntimeWithLastInstanceId:(int32_t)lastInstanceId {
+- (void)setUpRuntimeWithLastInstanceId:(int32_t)lastInstanceId debuggable:(BOOL)debuggable {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_RENDER_SETUP_RUNTIME);
 
   [self setUpLynxContextWithLastInstanceId:lastInstanceId];
@@ -236,7 +237,7 @@
       _enablePendingJSTaskOnLayout, _runtimeOptions.enableBytecode);
   shell_->InitRuntime([_runtimeOptions groupID], resource_loader, native_module_manager,
                       std::move(on_runtime_actor_created), [_runtimeOptions preloadJSPath],
-                      runtime_flags, [_runtimeOptions bytecodeUrlString]);
+                      runtime_flags, [_runtimeOptions bytecodeUrlString], debuggable);
   [self setUpExtensionModules];
 }
 
@@ -378,7 +379,7 @@
   [self setUpUIRendererWithBuilder:builder screenSize:screenSize];
 
   /// LynxShell
-  [self setUpLynxShellWithLastInstanceId:kUnknownInstanceId];
+  [self setUpLynxShellWithLastInstanceId:kUnknownInstanceId debuggable:_debuggable];
 
   /// Event
   [self setUpEventHandler];
@@ -415,7 +416,7 @@
 - (void)reset:(int32_t)lastInstanceId {
   [self setUpShadowNodeOwner];
   [self setUpUIDelegate];
-  [self setUpLynxShellWithLastInstanceId:lastInstanceId];
+  [self setUpLynxShellWithLastInstanceId:lastInstanceId debuggable:_debuggable];
   [self setUpEventHandler];
 }
 

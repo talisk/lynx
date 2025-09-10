@@ -297,7 +297,7 @@ LynxShell* LynxShellBuilder::build() {
                          shell,
                          (shell_option_.page_options_.IsLayoutInElementModeOn()
                               ? std::move(this->layout_context_)
-                              : nullptr)),
+                              : nullptr), debuggable_),
         shell->runners_.GetTASMTaskRunner(), shell->instance_id_);
   }
 
@@ -387,7 +387,7 @@ std::unique_ptr<lynx::shell::LynxEngine> LynxShellBuilder::CreateLynxEngine(
     const std::shared_ptr<LynxCardCacheDataManager>& card_cached_data_mgr,
     int32_t instance_id, LynxShell* shell,
     std::unique_ptr<lynx::tasm::LayoutCtxPlatformImpl>
-        platform_layout_context) {
+        platform_layout_context, bool debuggable) {
   // lynx_engine_creator_ is nullptr by default, it is used only for
   // lynx_shell_unitests.
   if (this->lynx_engine_creator_ != nullptr) {
@@ -399,7 +399,7 @@ std::unique_ptr<lynx::shell::LynxEngine> LynxShellBuilder::CreateLynxEngine(
   }
   auto element_manager = std::make_unique<lynx::tasm::ElementManager>(
       std::move(painting_context_), tasm_mediator.get(), this->lynx_env_config_,
-      instance_id, this->element_manager_vsync_monitor_,
+      debuggable, instance_id, this->element_manager_vsync_monitor_,
       std::move(platform_layout_context));
   // Currently, tasm_mediator serves as the implementation of both
   // TemplateAssembler::Delegate and TemplateAssembler::LayoutScheduler,
@@ -443,6 +443,11 @@ LynxShellBuilder& LynxShellBuilder::SetTasmPlatformInvoker(
 LynxShellBuilder& LynxShellBuilder::SetNativeModuleManager(
     std::unique_ptr<lynx::pub::LynxNativeModuleManager> native_module_manager) {
   this->native_module_manager_ = std::move(native_module_manager);
+  return *this;
+}
+
+LynxShellBuilder& LynxShellBuilder::SetDebuggable(bool debuggable) {
+  this->debuggable_ = debuggable;
   return *this;
 }
 

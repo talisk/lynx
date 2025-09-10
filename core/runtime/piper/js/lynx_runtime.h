@@ -75,7 +75,7 @@ class LynxRuntime final {
                 native_module_manager,
             const std::shared_ptr<piper::InspectorRuntimeObserverNG>&
                 runtime_observer,
-            std::vector<std::string> preload_js_paths);
+            std::vector<std::string> preload_js_paths, bool debuggable);
 
   void CallJSCallback(const std::shared_ptr<piper::ModuleCallback>& callback,
                       int64_t id_to_delete);
@@ -201,10 +201,10 @@ class LynxRuntime final {
       std::vector<std::string> preload_js_paths,
       std::vector<std::pair<std::string, std::string>>& ret);
   void ReadCoreJS(std::vector<std::pair<std::string, std::string>>& ret);
-  void InitPartRuntime(std::vector<std::string> preload_js_paths);
-  void InitFullRuntime(std::vector<std::string> preload_js_paths);
+  void InitPartRuntime(std::vector<std::string> preload_js_paths, bool debuggable);
+  void InitFullRuntime(std::vector<std::string> preload_js_paths, bool debuggable);
   void InitExecutor(
-      std::vector<std::pair<std::string, std::string>> preload_js_sources);
+      std::vector<std::pair<std::string, std::string>> preload_js_sources, bool debuggable);
   void UpdateState(State state);
   void OnRuntimeReady();
   void OnSsrRuntimeReady();
