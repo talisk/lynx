@@ -49,7 +49,8 @@ bool TemplateEntry::ConstructContext(TemplateAssembler* assembler,
                                      bool is_lepusng_binary,
                                      const lepus::ContextBundle& context_bundle,
                                      bool use_context_pool,
-                                     bool disable_tracing_gc) {
+                                     bool disable_tracing_gc,
+                                     bool debuggable) {
   auto source_type = LepusContextSourceType::kFromRuntime;
   bool enable_use_context_pool =
       use_context_pool || template_bundle().EnableUseContextPool();
@@ -89,7 +90,8 @@ bool TemplateEntry::ConstructContext(TemplateAssembler* assembler,
   if (!vm_context_) {
     uint32_t mode = tasm::performance::MemoryMonitor::ScriptingEngineMode();
     vm_context_ = lepus::Context::CreateContext(is_lepusng_binary,
-                                                disable_tracing_gc, mode);
+                                                disable_tracing_gc, mode,
+                                                debuggable);
   }
 
   if (!vm_context_) {
@@ -140,9 +142,10 @@ TemplateEntry::ConstructEntryWithNoTemplateAssembler(
 
 bool TemplateEntry::InitWithTemplateBundle(
     TemplateBinaryReader::PageConfigger* configger,
-    LynxTemplateBundle template_bundle) {
+    LynxTemplateBundle template_bundle,
+    bool debuggable) {
   SetTemplateBundle(std::move(template_bundle));
-  return InitWithPageConfigger(configger);
+  return InitWithPageConfigger(configger, debuggable);
 }
 
 void TemplateEntry::SetTemplateBundle(LynxTemplateBundle template_bundle) {
@@ -172,7 +175,7 @@ std::string TemplateEntry::GenerateLepusJSFileName(const std::string& name) {
 }
 
 bool TemplateEntry::InitWithPageConfigger(
-    TemplateBinaryReader::PageConfigger* configger) {
+    TemplateBinaryReader::PageConfigger* configger, bool debuggable) {
   TRACE_EVENT(LYNX_TRACE_CATEGORY, TEMPLATE_ENTRY_INIT_WITH_PAGE_CONFIG);
 
   if (is_card_ != template_bundle_.IsCard()) {
@@ -192,7 +195,7 @@ bool TemplateEntry::InitWithPageConfigger(
 
   // lazy construct lepus context.
   if (!InitLepusContext(static_cast<TemplateAssembler*>(configger),
-                        page_config)) {
+                        page_config, debuggable)) {
     return false;
   }
 
@@ -228,7 +231,8 @@ bool TemplateEntry::InitWithPageConfigger(
 }
 
 bool TemplateEntry::InitLepusContext(
-    TemplateAssembler* tasm, const std::shared_ptr<PageConfig>& page_config) {
+    TemplateAssembler* tasm, const std::shared_ptr<PageConfig>& page_config,
+    bool debuggable) {
   if (vm_context_) {
     return true;
   }
@@ -266,7 +270,8 @@ bool TemplateEntry::InitLepusContext(
   if (!ConstructContext(tasm, template_bundle().is_lepusng_binary(),
                         *template_bundle().context_bundle_,
                         page_config->GetEnableUseContextPool(),
-                        page_config->GetDisableQuickTracingGC())) {
+                        page_config->GetDisableQuickTracingGC(),
+                        debuggable)) {
     constexpr char kContextConstructFailed[] = "Context construct failed";
     error_msg_ = kContextConstructFailed;
     return false;

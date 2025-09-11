@@ -409,7 +409,7 @@ std::unique_ptr<lynx::shell::LynxEngine> LynxShellBuilder::CreateLynxEngine(
   // complex.
   auto tasm = std::make_unique<lynx::tasm::TemplateAssembler>(
       *tasm_mediator, std::move(element_manager), *tasm_mediator, instance_id,
-      this->enable_unified_pipeline_);
+      this->enable_unified_pipeline_, debuggable);
   tasm->SetEnableLayoutOnly(this->enable_layout_only_);
   if (this->loader_ != nullptr) {
     tasm->SetLazyBundleLoader(this->loader_);

@@ -184,9 +184,10 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateJSRuntime(
   // and the context is being shared.
   bool need_create_context_wrapper = true;
   if (is_single_context) {
-    js_runtime = CreateRuntime(
-        group_id, exception_handler, force_use_lightweight_js_engine, rt_id,
-        enable_bytecode, bytecode_source_url, std::move(bytecode_getter), debuggable);
+    js_runtime = CreateRuntime(group_id, exception_handler,
+                               force_use_lightweight_js_engine, rt_id,
+                               enable_bytecode, bytecode_source_url,
+                               std::move(bytecode_getter), debuggable);
     js_context = CreateJSIContext(js_runtime, group_id);
     LOGI("create single_context:" << js_context.get());
   } else {
@@ -225,25 +226,27 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateJSRuntime(
         }
       }
       need_create_context_wrapper = false;
-      js_runtime =
-          CreateRuntime(group_id, exception_handler,
-                        force_use_lightweight_js_engine, rt_id, enable_bytecode,
-                        bytecode_source_url, std::move(bytecode_getter), debuggable, true);
+      js_runtime = CreateRuntime(group_id, exception_handler,
+                                 force_use_lightweight_js_engine, rt_id,
+                                 enable_bytecode, bytecode_source_url,
+                                 std::move(bytecode_getter), debuggable, true);
       js_runtime->setCreatedType(
           piper::JSRuntimeCreatedType::none_vm_none_context);
       LOGI("get shared_context success, context:" << js_context.get()
                                                   << ", group:" << group_id);
     } else {
       // share context first create.
-      js_runtime = CreateRuntime(
-          group_id, exception_handler, force_use_lightweight_js_engine, rt_id,
-          enable_bytecode, bytecode_source_url, std::move(bytecode_getter), debuggable);
+      js_runtime = CreateRuntime(group_id, exception_handler,
+                                 force_use_lightweight_js_engine, rt_id,
+                                 enable_bytecode, bytecode_source_url,
+                                 std::move(bytecode_getter), debuggable);
       js_context = CreateJSIContext(js_runtime, group_id);
       LOGI("get shared_context failed, create context:"
            << js_context.get() << ", group:" << group_id);
     }
   }
-  EnsureConsolePostMan(js_context, executor, force_use_lightweight_js_engine, debuggable);
+  EnsureConsolePostMan(js_context, executor, force_use_lightweight_js_engine,
+                       debuggable);
   js_runtime->InitRuntime(js_context, exception_handler);
   js_runtime->setGroupId(group_id);
 
@@ -264,15 +267,16 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateJSRuntime(
                                                             js_runtime->type());
       }
       global_runtime =
-          MakeRuntime(js_runtime->type() == piper::JSRuntimeType::quickjs, false, debuggable);
+          MakeRuntime(js_runtime->type() == piper::JSRuntimeType::quickjs,
+                      false, debuggable);
       // FIXME(heshan):now set exception_handler to global runtime, not
       // correct...
       global_runtime->InitRuntime(js_context, exception_handler);
       global_runtime->setGroupId(group_id);
     }
 #if ENABLE_TRACE_PERFETTO
-    auto runtime_profiler =
-        MakeRuntimeProfiler(js_context, force_use_lightweight_js_engine, debuggable);
+    auto runtime_profiler = MakeRuntimeProfiler(
+        js_context, force_use_lightweight_js_engine, debuggable);
     context_wrapper->SetRuntimeProfiler(runtime_profiler);
 #endif
     js_context->SetReleaseObserver(context_wrapper);
@@ -280,9 +284,9 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateJSRuntime(
     if (!IsInspectEnabled(force_use_lightweight_js_engine, debuggable)) {
       post_man = js_context->GetPostMan();
     }
-    context_wrapper->initGlobal(global_runtime, post_man);
+    context_wrapper->initGlobal(global_runtime, post_man, debuggable);
     if (ensure_console) {
-      context_wrapper->EnsureConsole(post_man);
+      context_wrapper->EnsureConsole(post_man, debuggable);
     }
 
     // should call brefore loadPreJS.
@@ -307,9 +311,10 @@ std::shared_ptr<piper::Runtime> RuntimeManager::CreateRuntime(
     std::shared_ptr<piper::JSIExceptionHandler> exception_handler,
     bool force_use_lightweight_js_engine, int64_t rt_id, bool enable_bytecode,
     const std::string& bytecode_source_url,
-    piper::BytecodeGetter bytecode_getter, bool debuggable, bool use_shared_context) {
-  auto js_runtime =
-      MakeRuntime(force_use_lightweight_js_engine, use_shared_context, debuggable);
+    piper::BytecodeGetter bytecode_getter, bool debuggable,
+    bool use_shared_context) {
+  auto js_runtime = MakeRuntime(force_use_lightweight_js_engine,
+                                use_shared_context, debuggable);
   js_runtime->setRuntimeId(rt_id);
   js_runtime->SetEnableUserBytecode(enable_bytecode);
   js_runtime->SetBytecodeSourceUrl(bytecode_source_url);
@@ -403,7 +408,8 @@ void RuntimeManager::EnsureConsolePostMan(
 }
 
 std::shared_ptr<piper::Runtime> RuntimeManager::MakeRuntime(
-    bool force_use_lightweight_js_engine, bool use_shared_context, bool debuggable) {
+    bool force_use_lightweight_js_engine, bool use_shared_context,
+    bool debuggable) {
   if (IsInspectEnabled(force_use_lightweight_js_engine, debuggable)) {
     return runtime_manager_delegate_->MakeRuntime(
         force_use_lightweight_js_engine, use_shared_context, debuggable);
@@ -518,7 +524,8 @@ std::shared_ptr<profile::RuntimeProfiler> RuntimeManager::MakeRuntimeProfiler(
 }
 #endif  // ENABLE_TRACE_PERFETTO
 
-bool RuntimeManager::IsInspectEnabled(bool force_use_lightweight_js_engine, bool debuggable) {
+bool RuntimeManager::IsInspectEnabled(bool force_use_lightweight_js_engine,
+                                      bool debuggable) {
   return runtime_manager_delegate_ &&
          tasm::LynxEnv::GetInstance().IsJsDebugEnabled(
              force_use_lightweight_js_engine, debuggable);
